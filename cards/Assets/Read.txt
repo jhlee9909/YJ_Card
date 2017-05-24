@@ -1,0 +1,8 @@
+//안드로이드 세로 화면에 크기 적당히 맞춰지는 법
+//Scenes 폴더에 BasicScene 이라고 있습니다
+//Camera , Canvas 만 봐주시면 됩니다
+// [Canvas 오브젝트] 의 [Canvas 속성]에 [Render Mode] 를 World Space로
+// [Canvas 오브젝트] 의 RectTransform 에서 PosX,Y 를 0 으로 width, height 를 원하는 크기로
+// [Canvas 오브젝트] 의 [Canvas 속성]에 Event Camear 에다 Main Camera 를 넣어주세요
+// [Camera 오브젝트] 의  [Camera속성]에 Size 를 쪼금씩 늘리다 보면 맞추어집니다
+// Canvas 의 Panel 은 UI 크기가 비슷하게 보이게 조정해주는 역할을 합니다
