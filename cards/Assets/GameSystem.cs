@@ -3,7 +3,21 @@ using System.Collections;
 
 using System;
 using System.Collections.Generic;//For Use List
+
+using UnityEngine.SceneManagement;
+
 public class GameSystem : MonoBehaviour {
+
+	int count=0;
+	int Ocount=0;
+	public GameObject CardSpawner;
+	public GameObject OppoCardSpawner;
+	public bool isGameEnd;
+
+	public GameObject ScorePanel;
+
+	public int PNum,ONum;
+
 	public enum CardSetA{
 		one = 1,
 		two,
@@ -35,25 +49,135 @@ public class GameSystem : MonoBehaviour {
 	}
 	// Use this for initialization
 	void Start () {
+		
+//		for(int i = 0 ; i < CardListA.Count ; i ++){
+//			Debug.Log (CardIndexA [i]);
+//		}
+		Debug.Log (CardListA [0]);
+		Debug.Log (CardListA[CardListA.Count-1]);
 
-		for(int i = 0 ; i < CardListA.Count ; i ++){
-			Debug.Log (CardIndexA [i]);
-		}
+		GameInit();
+		DrawCard ();
+		DrawCard ();
+		SingleOppoDraw ();
+		SingleOppoDraw ();
+
 
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		
+		SetScore ();
+	}
+	public void ReGame(){
+		SceneManager.LoadScene ("BasicScene");
+	}
+	public void GameInit(){
+		PNum = 0;
+		ONum = 0;
+		count = 0;
+		Ocount = 0;
+	}
+	public void SetScore(){
+		if (!isGameEnd) {
+			ScorePanel.SetActive (false);
+			return;
+		}
+		if (isGameEnd) {
+			ScorePanel.SetActive (true);
+			ScorePanel.SendMessage ("SetOScore", ONum);
+			ScorePanel.SendMessage ("SetPScore", PNum);
+		}
+
+	}
+	public void EndTurn(){
+
+		for (int i = 0; i < GameObject.FindGameObjectsWithTag ("OCard").Length; i++) {
+			//Debug.Log (GameObject.FindGameObjectsWithTag ("OCard") [i].GetComponentInChildren<Animator> ());
+		//	GameObject.FindGameObjectsWithTag ("OCard") [i].GetComponentInChildren<Animator> ().SetTrigger ("CardOpen");
+			GameObject.FindGameObjectsWithTag ("OCard") [i].BroadcastMessage("Turn");
+		}
+		isGameEnd = true;
+
 	}
 	public void DrawCard(){
+		if (count >= 3) {
+			return;
+		}
+		if (isGameEnd) {
+			return;
+		}
+		count++;
+
+		if (count > 2 && ONum < 21) {
+			SingleOppoDraw ();
+		}
+
+		if (GameObject.FindGameObjectsWithTag ("CardSet").Length>0) {
 		
-		int ran1 = UnityEngine.Random.Range (0, CardListA.Count-1);
+			if (count <= 2) {
+				for (int i = 0; i < GameObject.FindGameObjectsWithTag ("CardSet").Length; i++) {
+					GameObject.FindGameObjectsWithTag ("CardSet") [i].transform.Translate (-200, 0, 0);
+				}
+			}
+
+
+		}
+		int ran1 = (int)UnityEngine.Random.Range (0, CardListA.Count);
 
 		int temp = CardListA[ran1];
+		Debug.Log ("Draw : " + temp);
+		PNum += temp;
+			
+		GameObject card = (GameObject)Instantiate (CardSpawner, new Vector3(0,0,0), CardSpawner.transform.rotation);
+		if (count > 2) {
+			card.transform.Translate (200, 0, 0);
+		}
+		card.transform.SetParent(GameObject.Find("CardPanel").transform);
+
+
+
+		card.BroadcastMessage("Spawn", temp, SendMessageOptions.DontRequireReceiver);
+
+
+
+
 
 		CardListA.RemoveAt( ran1 );
 
+
+	}
+
+	public void SingleOppoDraw(){
+		if (Ocount >= 3) {
+			return;
+		}
+		if (isGameEnd) {
+			return;
+		}
+		Ocount++;
+		if (Ocount <= 2) {
+			for (int i = 0; i < GameObject.FindGameObjectsWithTag ("OCard").Length; i++) {
+				GameObject.FindGameObjectsWithTag ("OCard") [i].transform.Translate (-200, 0, 0);
+			}
+		}
+		GameObject card = (GameObject)Instantiate (OppoCardSpawner, new Vector3(0,0,0), OppoCardSpawner.transform.rotation);
+
+		if (Ocount > 2) {
+			card.transform.Translate (200, 0, 0);
+		}
+
+		card.transform.SetParent(GameObject.Find("OCardPanel").transform);
+
+
+
+		int ran1 =  (int)UnityEngine.Random.Range (0, CardListA.Count);
+
+		int temp = CardListA[ran1];
+		ONum += temp;
+		Debug.Log ("Draw : " + temp);
+		card.BroadcastMessage("Spawn", temp, SendMessageOptions.DontRequireReceiver);
+		CardListA.RemoveAt( ran1 );
 
 	}
 
